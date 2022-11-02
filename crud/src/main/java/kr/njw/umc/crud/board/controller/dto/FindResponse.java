@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class FindResponse {
-    private boolean success;
+    private Long id;
     private String title;
     private String description;
     private LocalDateTime registerDateTime;
