@@ -4,9 +4,9 @@ import kr.njw.umc.crud.board.model.Article;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -20,10 +20,11 @@ import java.util.Optional;
 @Repository
 public class BoardDaoImpl implements BoardDao {
     private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final RowMapper<Article> articleRowMapper = BeanPropertyRowMapper.newInstance(Article.class);
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public List<Article> findAll() {
-        return this.jdbcTemplate.query("SELECT * FROM board", new BeanPropertyRowMapper<>(Article.class));
+        return this.jdbcTemplate.query("SELECT * FROM board", this.articleRowMapper);
     }
 
     public Optional<Article> find(Long id) {
@@ -32,12 +33,9 @@ public class BoardDaoImpl implements BoardDao {
 
         try {
             return Optional.ofNullable(this.jdbcTemplate.queryForObject("SELECT * FROM board WHERE id = :id",
-                    parameters, new BeanPropertyRowMapper<>(Article.class)));
+                    parameters, this.articleRowMapper));
         } catch (EmptyResultDataAccessException e) {
             this.logger.warn(e.toString());
-            return Optional.empty();
-        } catch (DataAccessException e) {
-            this.logger.error(e.toString());
             return Optional.empty();
         }
     }
@@ -51,24 +49,19 @@ public class BoardDaoImpl implements BoardDao {
         parameters.addValue("description", article.getDescription());
         parameters.addValue("register_date_time", article.getRegisterDateTime());
 
-        try {
-            this.jdbcTemplate.update("""
-                    INSERT INTO
-                        board (
-                            id, title, description, register_date_time
-                        )
-                    VALUE
-                        (
-                            :id, :title, :description, :register_date_time
-                        )
-                    ON DUPLICATE KEY UPDATE
-                        title = :title,
-                        description = :description,
-                        register_date_time = :register_date_time""", parameters, generatedKeyHolder);
-        } catch (DataAccessException e) {
-            this.logger.error(e.toString());
-            return null;
-        }
+        this.jdbcTemplate.update("""
+                INSERT INTO
+                    board (
+                        id, title, description, register_date_time
+                    )
+                VALUE
+                    (
+                        :id, :title, :description, :register_date_time
+                    )
+                ON DUPLICATE KEY UPDATE
+                    title = :title,
+                    description = :description,
+                    register_date_time = :register_date_time""", parameters, generatedKeyHolder);
 
         if (article.getId() != null) {
             return article.getId();
@@ -81,12 +74,7 @@ public class BoardDaoImpl implements BoardDao {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", id);
 
-        try {
-            this.jdbcTemplate.update("DELETE FROM board WHERE id = :id", parameters);
-        } catch (DataAccessException e) {
-            this.logger.error(e.toString());
-            return false;
-        }
+        this.jdbcTemplate.update("DELETE FROM board WHERE id = :id", parameters);
 
         return true;
     }
