@@ -1,0 +1,18 @@
+server:
+  port: 9000
+  error:
+    whitelabel:
+      enabled: false
+  tomcat:
+    max-http-form-post-size: -1
+    max-swallow-size: -1
+
+spring:
+  application:
+    name: demo
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://database-1.cdkhkdpxm0kr.ap-northeast-2.rds.amazonaws.com/UMC
+    username: admin
+    password: umctest123
