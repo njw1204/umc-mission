@@ -23,7 +23,6 @@ public class JwtService {
     private static final String AUTHORITIES_KEY = "authorities";
     private static final String ENCODED_SECRET = Base64.getEncoder().encodeToString(Secret.JWT_SECRET_KEY.getBytes());
 
-    // JWT 생성
     public String createToken(String id) {
         Date now = new Date();
         return Jwts.builder()

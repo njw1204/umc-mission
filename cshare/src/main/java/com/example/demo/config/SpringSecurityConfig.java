@@ -19,7 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
-public class WebSecurityConfig {
+public class SpringSecurityConfig {
     private final JwtService jwtService;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
@@ -30,6 +30,8 @@ public class WebSecurityConfig {
                 .antMatchers(HttpMethod.GET, "/**").permitAll()
                 .antMatchers(HttpMethod.HEAD, "/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/users", "/tokens").permitAll()
+                .antMatchers(HttpMethod.DELETE, "/users/me").permitAll()
                 .anyRequest().hasAuthority(Constant.ROLE_USER).and()
                 .formLogin().disable()
                 .logout().disable()
