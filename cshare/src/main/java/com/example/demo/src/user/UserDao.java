@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.Objects;
@@ -17,7 +16,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Repository
 public class UserDao {
-    private final PasswordEncoder passwordEncoder;
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RowMapper<User> userRowMapper = BeanPropertyRowMapper.newInstance(User.class);
 
@@ -26,7 +24,7 @@ public class UserDao {
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("username", user.getUsername());
-        parameters.addValue("password", this.passwordEncoder.encode(user.getPassword()));
+        parameters.addValue("password", user.getPassword());
         parameters.addValue("register_date_time", user.getRegisterDateTime());
 
         this.jdbcTemplate.update("""
@@ -45,7 +43,7 @@ public class UserDao {
     public void updateUserPassword(Long userId, String password) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", userId);
-        parameters.addValue("password", this.passwordEncoder.encode(password));
+        parameters.addValue("password", password);
 
         this.jdbcTemplate.update("""
                 UPDATE

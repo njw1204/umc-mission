@@ -20,7 +20,7 @@ public class UserService {
         try {
             return this.userDao.createUser(User.builder()
                     .username(username)
-                    .password(password)
+                    .password(this.passwordEncoder.encode(password))
                     .registerDateTime(LocalDateTime.now())
                     .build()).orElse(null);
         } catch (DataAccessException e) {
@@ -37,7 +37,7 @@ public class UserService {
             }
 
             if (password != null) {
-                this.userDao.updateUserPassword(userId, password);
+                this.userDao.updateUserPassword(userId, this.passwordEncoder.encode(password));
             }
         } catch (DataAccessException e) {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);

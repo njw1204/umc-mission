@@ -3,7 +3,7 @@ package com.example.demo.config;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,8 +22,8 @@ public class GlobalControllerAdvice {
         return ResponseEntity.badRequest().body(new BaseResponse<>(BaseResponseStatus.REQUEST_ERROR));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<BaseResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<BaseResponse<?>> handleBindException(BindException e) {
         return ResponseEntity.badRequest().body(new BaseResponse<>(BaseResponseStatus.REQUEST_ERROR));
     }
 
