@@ -39,6 +39,7 @@ public class GlobalControllerAdvice {
             case REQUEST_ERROR -> HttpStatus.BAD_REQUEST;
             case EMPTY_JWT, INVALID_JWT, FAILED_TO_LOGIN -> HttpStatus.UNAUTHORIZED;
             case INVALID_USER_JWT -> HttpStatus.FORBIDDEN;
+            case RESPONSE_ERROR -> HttpStatus.NOT_FOUND;
             case DUPLICATED_EMAIL -> HttpStatus.CONFLICT;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };

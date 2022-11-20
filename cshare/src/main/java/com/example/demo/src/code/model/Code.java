@@ -35,4 +35,16 @@ public class Code {
     private CodeVisibility visibility;
     @Column(nullable = false)
     private LocalDateTime registerDateTime;
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateVisibility(CodeVisibility visibility) {
+        this.visibility = visibility;
+    }
 }

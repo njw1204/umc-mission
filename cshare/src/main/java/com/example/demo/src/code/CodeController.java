@@ -60,6 +60,20 @@ public class CodeController {
         return ResponseEntity.ok(new BaseResponse<>(res));
     }
 
+    @PostMapping("")
+    public ResponseEntity<BaseResponse<PostCodeRes>> postCode(@Valid @RequestBody PostCodeReq req,
+                                                              Principal principal) throws BaseException {
+        PostCodeRes res = new PostCodeRes();
+        res.setCodeId(
+                this.codeService.createCode(Long.valueOf(principal.getName()), req.getName(), req.getDescription(),
+                        req.getContent(), req.getVisibility()));
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/{codeId}")
+                        .buildAndExpand(res.getCodeId())
+                        .toUri())
+                .body(new BaseResponse<>(res));
+    }
+
     @GetMapping("/{codeId}")
     public ResponseEntity<BaseResponse<GetCodeRes>> getCode(@PathVariable Long codeId, Principal principal) {
         GetCodeRes res = new GetCodeRes();
@@ -84,6 +98,25 @@ public class CodeController {
         return ResponseEntity.ok(new BaseResponse<>(res));
     }
 
+    @PatchMapping("/{codeId}")
+    public ResponseEntity<BaseResponse<PatchCodeRes>> patchCode(@PathVariable Long codeId,
+                                                                @Valid @RequestBody PatchCodeReq req,
+                                                                Principal principal) throws BaseException {
+        PatchCodeRes res = new PatchCodeRes();
+        Long userId = (principal != null) ? Long.valueOf(principal.getName()) : null;
+        this.codeService.updateCode(userId, codeId, req.getName(), req.getDescription(), req.getVisibility());
+        res.setCodeId(codeId);
+        return ResponseEntity.ok(new BaseResponse<>(res));
+    }
+
+    @DeleteMapping("/{codeId}")
+    public ResponseEntity<BaseResponse<?>> deleteCode(@PathVariable Long codeId, Principal principal)
+            throws BaseException {
+        Long userId = (principal != null) ? Long.valueOf(principal.getName()) : null;
+        this.codeService.deleteCode(userId, codeId);
+        return ResponseEntity.ok(new BaseResponse<>(BaseResponseStatus.SUCCESS));
+    }
+
     @GetMapping(value = "/{codeId}/raw", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> getCodeRaw(@PathVariable Long codeId, Principal principal) {
         Long userId = (principal != null) ? Long.valueOf(principal.getName()) : null;
@@ -94,19 +127,5 @@ public class CodeController {
         }
 
         return ResponseEntity.ok(codeRevision.getContent());
-    }
-
-    @PostMapping("")
-    public ResponseEntity<BaseResponse<PostCodeRes>> postCode(@Valid @RequestBody PostCodeReq req,
-                                                              Principal principal) throws BaseException {
-        PostCodeRes res = new PostCodeRes();
-        res.setCodeId(
-                this.codeService.createCode(Long.valueOf(principal.getName()), req.getName(), req.getDescription(),
-                        req.getContent(), req.getVisibility()));
-        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/{codeId}")
-                        .buildAndExpand(res.getCodeId())
-                        .toUri())
-                .body(new BaseResponse<>(res));
     }
 }
