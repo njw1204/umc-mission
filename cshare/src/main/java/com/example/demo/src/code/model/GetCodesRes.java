@@ -16,7 +16,7 @@ public class GetCodesRes {
 
     @Data
     public static class CodeItem {
-        private Long id;
+        private Long codeId;
         private Long userId;
         private String username;
         private String name;

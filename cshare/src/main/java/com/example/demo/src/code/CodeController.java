@@ -1,15 +1,16 @@
 package com.example.demo.src.code;
 
+import com.example.demo.config.BaseException;
 import com.example.demo.config.BaseResponse;
-import com.example.demo.src.code.model.Code;
-import com.example.demo.src.code.model.GetCodesReq;
-import com.example.demo.src.code.model.GetCodesRes;
+import com.example.demo.config.BaseResponseStatus;
+import com.example.demo.src.code.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.security.Principal;
@@ -19,6 +20,7 @@ import java.security.Principal;
 @RestController
 public class CodeController {
     private final CodeProvider codeProvider;
+    private final CodeService codeService;
 
     @GetMapping("")
     public ResponseEntity<BaseResponse<GetCodesRes>> getCodes(@Valid GetCodesReq req, Principal principal) {
@@ -42,7 +44,7 @@ public class CodeController {
 
         res.setItems(codePage.stream().map(code -> {
             GetCodesRes.CodeItem codeItem = new GetCodesRes.CodeItem();
-            codeItem.setId(code.getId());
+            codeItem.setCodeId(code.getId());
             codeItem.setUserId(code.getUser().getId());
             codeItem.setUsername(code.getUser().getUsername());
             codeItem.setName(code.getName());
@@ -56,5 +58,55 @@ public class CodeController {
         res.setPageSizeLimit(codePage.getSize());
         res.setTotalSize(codePage.getTotalElements());
         return ResponseEntity.ok(new BaseResponse<>(res));
+    }
+
+    @GetMapping("/{codeId}")
+    public ResponseEntity<BaseResponse<GetCodeRes>> getCode(@PathVariable Long codeId, Principal principal) {
+        GetCodeRes res = new GetCodeRes();
+        Long userId = (principal != null) ? Long.valueOf(principal.getName()) : null;
+        CodeRevision codeRevision = this.codeProvider.findLatestCodeRevision(userId, codeId).orElse(null);
+
+        if (codeRevision == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new BaseResponse<>(BaseResponseStatus.RESPONSE_ERROR));
+        }
+
+        Code code = codeRevision.getCode();
+        res.setCodeId(code.getId());
+        res.setUserId(code.getUser().getId());
+        res.setUsername(code.getUser().getUsername());
+        res.setName(code.getName());
+        res.setDescription(code.getDescription());
+        res.setContent(codeRevision.getContent());
+        res.setVisibility(code.getVisibility());
+        res.setRegisterDateTime(code.getRegisterDateTime());
+        res.setUpdateDateTime(codeRevision.getRegisterDateTime());
+        return ResponseEntity.ok(new BaseResponse<>(res));
+    }
+
+    @GetMapping(value = "/{codeId}/raw", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getCodeRaw(@PathVariable Long codeId, Principal principal) {
+        Long userId = (principal != null) ? Long.valueOf(principal.getName()) : null;
+        CodeRevision codeRevision = this.codeProvider.findLatestCodeRevision(userId, codeId).orElse(null);
+
+        if (codeRevision == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("");
+        }
+
+        return ResponseEntity.ok(codeRevision.getContent());
+    }
+
+    @PostMapping("")
+    public ResponseEntity<BaseResponse<PostCodeRes>> postCode(@Valid @RequestBody PostCodeReq req,
+                                                              Principal principal) throws BaseException {
+        PostCodeRes res = new PostCodeRes();
+        res.setCodeId(
+                this.codeService.createCode(Long.valueOf(principal.getName()), req.getName(), req.getDescription(),
+                        req.getContent(), req.getVisibility()));
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/{codeId}")
+                        .buildAndExpand(res.getCodeId())
+                        .toUri())
+                .body(new BaseResponse<>(res));
     }
 }

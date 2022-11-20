@@ -10,9 +10,30 @@ server:
 spring:
   application:
     name: demo
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://database-1.cdkhkdpxm0kr.ap-northeast-2.rds.amazonaws.com/UMC
     username: admin
     password: umctest123
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+
+logging:
+  level:
+    org.hibernate:
+      SQL: DEBUG
+      type:
+        descriptor:
+          sql:
+            BasicBinder: TRACE
+    org.springframework:
+      jdbc:
+        core:
+          JdbcTemplate: DEBUG
+          StatementCreatorUtils: TRACE

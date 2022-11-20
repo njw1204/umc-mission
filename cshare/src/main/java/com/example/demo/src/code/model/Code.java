@@ -22,16 +22,17 @@ public class Code {
     @JoinColumn(name = "fork_from_id")
     private Code forkFrom;
     @ToString.Exclude
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
     @Column(length = 300, nullable = false)
     private String name;
+    @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
     private CodeVisibility visibility;
     @Column(nullable = false)
-    private LocalDateTime registerDateTime = LocalDateTime.MIN;
+    private LocalDateTime registerDateTime;
 }
