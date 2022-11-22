@@ -9,6 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -39,5 +41,20 @@ public class CodeProvider {
         }
 
         return Optional.empty();
+    }
+
+    public List<CodeRevision> findCodeRevisions(Long userId, Long codeId) {
+        List<CodeRevision> codeRevisions = this.codeRevisionRepository.findAllByCodeIdOrderByIdDesc(codeId);
+
+        if (codeRevisions.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        if (codeRevisions.get(0).getCode().getVisibility() == CodeVisibility.PUBLIC ||
+                codeRevisions.get(0).getCode().getUser().getId().equals(userId)) {
+            return codeRevisions;
+        }
+
+        return new ArrayList<>();
     }
 }

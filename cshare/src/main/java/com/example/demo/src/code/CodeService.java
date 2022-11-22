@@ -100,4 +100,27 @@ public class CodeService {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
+
+    public Long createCodeRevision(Long userId, Long codeId, String content) throws BaseException {
+        try {
+            Code code = this.codeRepository.findById(codeId).orElse(null);
+
+            if (code == null) {
+                throw new BaseException(BaseResponseStatus.RESPONSE_ERROR);
+            }
+
+            if (!code.getUser().getId().equals(userId)) {
+                throw new BaseException(BaseResponseStatus.INVALID_USER_JWT);
+            }
+
+            CodeRevision codeRevision = CodeRevision.builder()
+                    .code(code)
+                    .content(content)
+                    .registerDateTime(LocalDateTime.now())
+                    .build();
+            return this.codeRevisionRepository.saveAndFlush(codeRevision).getId();
+        } catch (DataAccessException e) {
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
 }

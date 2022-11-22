@@ -14,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/codes")
@@ -127,5 +128,39 @@ public class CodeController {
         }
 
         return ResponseEntity.ok(codeRevision.getContent());
+    }
+
+    @GetMapping("/{codeId}/revisions")
+    public ResponseEntity<BaseResponse<GetCodeRevisionsRes>> getCodeRevisions(@PathVariable Long codeId,
+                                                                              Principal principal) {
+        GetCodeRevisionsRes res = new GetCodeRevisionsRes();
+        Long userId = (principal != null) ? Long.valueOf(principal.getName()) : null;
+        List<CodeRevision> codeRevisions = this.codeProvider.findCodeRevisions(userId, codeId);
+
+        if (codeRevisions.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new BaseResponse<>(BaseResponseStatus.RESPONSE_ERROR));
+        }
+
+        res.setItems(codeRevisions.stream().map(codeRevision -> {
+            GetCodeRevisionsRes.RevisionItem revisionItem = new GetCodeRevisionsRes.RevisionItem();
+            revisionItem.setRevisionId(codeRevision.getId());
+            revisionItem.setContent(codeRevision.getContent());
+            revisionItem.setRegisterDateTime(codeRevision.getRegisterDateTime());
+            return revisionItem;
+        }).toList());
+        return ResponseEntity.ok(new BaseResponse<>(res));
+    }
+
+    @PostMapping("/{codeId}/revisions")
+    public ResponseEntity<BaseResponse<PostCodeRevisionRes>> postCodeRevision(@PathVariable Long codeId,
+                                                                              @Valid @RequestBody
+                                                                              PostCodeRevisionReq req,
+                                                                              Principal principal)
+            throws BaseException {
+        PostCodeRevisionRes res = new PostCodeRevisionRes();
+        Long userId = (principal != null) ? Long.valueOf(principal.getName()) : null;
+        res.setRevisionId(this.codeService.createCodeRevision(userId, codeId, req.getContent()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BaseResponse<>(res));
     }
 }

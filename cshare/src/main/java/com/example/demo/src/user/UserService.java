@@ -22,7 +22,7 @@ public class UserService {
                     .username(username)
                     .password(this.passwordEncoder.encode(password))
                     .registerDateTime(LocalDateTime.now())
-                    .build()).orElseThrow();
+                    .build()).orElse(null);
         } catch (DataAccessException e) {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
