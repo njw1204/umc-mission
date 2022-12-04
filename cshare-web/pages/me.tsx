@@ -2,7 +2,7 @@ import { Col, Container, Pagination, Row } from "react-bootstrap";
 import { CodeList } from "../components/CodeList";
 import { MenuBar } from "../components/MenuBar";
 
-export default function Index() {
+export default function Me() {
   return (
     <>
       <MenuBar />
