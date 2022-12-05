@@ -1,40 +1,71 @@
+import { useState } from "react";
 import { Accordion, Badge, Form } from "react-bootstrap";
+import { useQueries } from "react-query";
+import { useRecoilValue } from "recoil";
+import { getCode, GetCodesResultItem } from "../apis/code-api";
+import { userState } from "../stores/user-store";
 
-export function CodeList() {
+enum Visibility {
+  PRIVATE = "PRIVATE",
+}
+
+export interface CodeListProps {
+  data: GetCodesResultItem[];
+}
+
+export function CodeList({ data }: CodeListProps) {
+  const user = useRecoilValue(userState);
+  const token = user.accessToken || "";
+  const [selectedCodeId, setSelectedCodeId] = useState("");
+  const codeDetailQueries = useQueries(
+    data.map((item) => ({
+      queryKey: ["getCode", token, item.codeId],
+      queryFn: () => getCode(token, item.codeId),
+      enabled: String(item.codeId) === selectedCodeId,
+      refetchOnWindowFocus: false,
+    }))
+  );
+
   return (
-    <Accordion>
-      <Accordion.Item eventKey="1">
-        <Accordion.Header>
-          <div className="text-break me-3">
-            <div>
-              <span>abcde</span>&nbsp;/&nbsp;
-              <strong className="me-2">print.js</strong>
-              <Badge bg="secondary">Private</Badge>
+    <Accordion onSelect={(eventKey) => setSelectedCodeId(String(eventKey))}>
+      {data.map((item) => (
+        <Accordion.Item key={item.codeId} eventKey={String(item.codeId)}>
+          <Accordion.Header>
+            <div className="text-break me-3">
+              <div>
+                <span>{item.username}</span>&nbsp;/&nbsp;
+                <strong className="me-2">{item.name}</strong>
+                {item.visibility === Visibility.PRIVATE ? (
+                  <Badge bg="secondary">Private</Badge>
+                ) : null}
+              </div>
+              <div className="text-muted small mt-1 mb-3">
+                {item.registerDateTime.split("T")[0]}
+              </div>
+              <div>{item.description}</div>
             </div>
-            <div className="text-muted small mt-1 mb-3">2022-11-21</div>
-            <div>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </div>
-          </div>
-        </Accordion.Header>
-        <Accordion.Body>
-          <Form.Group>
-            <Form.Control
-              as="textarea"
-              className="font-monospace"
-              rows={20}
-              value={"test test test"}
-              readOnly
-            />
-          </Form.Group>
-        </Accordion.Body>
-      </Accordion.Item>
+          </Accordion.Header>
+          <Accordion.Body>
+            <Form.Group>
+              <Form.Label className="text-primary">
+                <strong>📑 {item.name}</strong>
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                className="font-monospace"
+                rows={20}
+                value={
+                  codeDetailQueries
+                    .map((query) => query.data)
+                    .find((data) => data?.result?.codeId === item.codeId)
+                    ?.result?.content
+                }
+                readOnly
+              />
+            </Form.Group>
+          </Accordion.Body>
+        </Accordion.Item>
+      ))}
     </Accordion>
   );
 }

@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { SSRProvider } from "react-bootstrap";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { RecoilRoot } from "recoil";
@@ -15,7 +16,9 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <RecoilRoot>
         <QueryClientProvider client={queryClient}>
-          <Component {...pageProps} />
+          <SSRProvider>
+            <Component {...pageProps} />
+          </SSRProvider>
           <ReactQueryDevtools />
         </QueryClientProvider>
       </RecoilRoot>

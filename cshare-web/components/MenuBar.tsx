@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useCallback } from "react";
 import { Button, Container, Nav, Navbar } from "react-bootstrap";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { userState, loginState } from "../stores/user-store";
 
 export function MenuBar() {
   const { pathname } = useRouter();
-  const user = useRecoilValue(userState);
+  const [user, setUser] = useRecoilState(userState);
   const isLogin = useRecoilValue(loginState);
+  const onClickLogout = useCallback(() => {
+    setUser({});
+  }, [setUser]);
 
   return (
     <Navbar expand="md" bg="dark" variant="dark" sticky="top" collapseOnSelect>
@@ -45,7 +49,11 @@ export function MenuBar() {
           {isLogin ? (
             <>
               <Navbar.Text className="me-3">{user.username}</Navbar.Text>
-              <Button variant="secondary" className="me-md-4">
+              <Button
+                variant="secondary"
+                className="me-md-4"
+                onClick={onClickLogout}
+              >
                 Logout
               </Button>
             </>
