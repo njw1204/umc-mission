@@ -17,7 +17,7 @@ export function CodeList({ data }: CodeListProps) {
   const user = useRecoilValue(userState);
   const token = user.accessToken || "";
   const [selectedCodeId, setSelectedCodeId] = useState("");
-  const codeDetailQueries = useQueries(
+  const getCodeQueries = useQueries(
     data.map((item) => ({
       queryKey: ["getCode", token, item.codeId],
       queryFn: () => getCode(token, item.codeId),
@@ -55,7 +55,7 @@ export function CodeList({ data }: CodeListProps) {
                 className="font-monospace"
                 rows={20}
                 value={
-                  codeDetailQueries
+                  getCodeQueries
                     .map((query) => query.data)
                     .find((data) => data?.result?.codeId === item.codeId)
                     ?.result?.content
