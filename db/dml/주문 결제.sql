@@ -1,14 +1,14 @@
 UPDATE
-	`order`
+    `order`
 SET
-	status = 1 -- 주문 접수
+    status = 1 -- 주문 접수
 WHERE
-	id = ?;
+    id = ?;
 
 UPDATE
-	order_payment
+    order_payment
 SET
-	pg_payment_id = ?,
-	status = 1 -- 결제 완료
+    pg_payment_id = ?,
+    status = 1 -- 결제 완료
 WHERE
-	id = ?;
+    id = ?;

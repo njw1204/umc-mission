@@ -1,20 +1,20 @@
 UPDATE
-	`order`
+    `order`
 SET
-	status = 2 -- 주문 취소
+    status = 2 -- 주문 취소
 WHERE
-	id = ?;
+    id = ?;
 
 UPDATE
-	coupon
+    coupon
 SET
-	status = 0 -- 사용 전
+    status = 0 -- 사용 전
 WHERE
-	id = ?;
+    id = ?;
 
 UPDATE
-	order_payment
+    order_payment
 SET
-	status = 2 -- 결제 취소
+    status = 2 -- 결제 취소
 WHERE
-	id = ?;
+    id = ?;

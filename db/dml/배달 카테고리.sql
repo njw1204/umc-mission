@@ -1,6 +1,6 @@
 SELECT
-	*
+    *
 FROM
-	store_category
+    store_category
 ORDER BY
-	name
+    name
